@@ -25,19 +25,54 @@ class ProductsController < ApplicationController
   #     - height: integer
   #     - weight: integer
   def find_best_match
-    max_length = params[:length].to_i
-    max_width = params[:width].to_i
-    max_height = params[:height].to_i
-    max_weight = params[:weight].to_i
+    length = params[:length].to_i
+    width = params[:width].to_i
+    height = params[:height].to_i
+    weight = params[:weight].to_i
   
-    products = Product.where(:length.eq => max_length, :width.eq => max_width, :height.eq => max_height, :weight.eq => max_weight).first
-    
-    if products
-      render json: products
+    products = Product.where(:length.gte => length, :width.gte => width, :height.gte => height, :weight.gte => weight)
+  
+    # If there are no products that match the given dimensions and weight
+    if products.empty?
+      render json: { error: 'No product found that matches the given dimensions and weight' }, status: :not_found
+      return
+    end
+  
+    # Initialize the differences to a very high value
+    length_diff = Float::INFINITY
+    height_diff = Float::INFINITY
+    width_diff = Float::INFINITY
+    weight_diff = Float::INFINITY
+  
+    best_match = nil
+  
+    # Loop through each product and find the one with the smallest differences
+    products.each do |product|
+      package_length_diff = product.length - length
+      package_width_diff = product.width - width
+      package_height_diff = product.height - height
+      package_weight_diff = product.weight - weight
+  
+      if package_length_diff <= length_diff && package_width_diff <= width_diff && package_height_diff <= height_diff && package_weight_diff <= weight_diff
+        length_diff = package_length_diff
+        width_diff = package_width_diff
+        height_diff = package_height_diff
+        weight_diff = package_weight_diff
+        best_match = product
+      end
+    end
+  
+    # If there is a best match, render it
+    if best_match
+      render json: best_match
     else
       render json: { error: 'No product found that matches the given dimensions and weight' }, status: :not_found
     end
   end
+  
+  
+
+  
   
   
 
