@@ -7,7 +7,7 @@ data["products"].each do |product|
     name: product['name'],
     type: product['type'],
     length: product['length'],
-    width: product['width']
+    width: product['width'],
     height: product['height'],
     weight: product['weight']
   )
